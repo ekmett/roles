@@ -1,0 +1,34 @@
+name:          roles
+category:      Data
+version:       0.1
+license:       BSD3
+cabal-version: >= 1.8
+license-file:  LICENSE
+author:        Edward A. Kmett
+maintainer:    Edward A. Kmett <ekmett@gmail.com>
+stability:     provisional
+homepage:      http://github.com/ekmett/roles/
+bug-reports:   http://github.com/ekmett/roles/issues
+copyright:     Copyright (C) 2014 Edward A. Kmett
+synopsis:      Composable class-based roles
+description:   Composable class-based roles
+build-type:    Custom
+extra-source-files:
+  .vim.custom
+  CHANGELOG.markdown
+  README.markdown
+
+source-repository head
+  type: git
+  location: git://github.com/ekmett/roles.git
+
+library
+  build-depends:
+    base                 >= 4.7   && < 5,
+    lens                 >= 4     && < 5
+
+  exposed-modules:
+    Data.Roles
+
+  ghc-options: -Wall -fwarn-tabs -O2
+  hs-source-dirs: src

@@ -45,18 +45,34 @@ class Representational (t :: k1 -> k2) where
   rep _ = phantom
 
 class Representational t => Phantom t where
-  -- | An argument is phantom if you can coerce the whole ignoring the argument
+  -- | An argument is phantom if you can 'coerce' the whole ignoring the argument
   phantom :: Coercion (t a) (t b)
   default phantom :: Coercible (t a) (t b) => Coercion (t a) (t b)
   phantom = Coercion
 
+-- * Data.Proxy
+
 instance Representational Proxy
 instance Phantom Proxy
 
+-- * Data.Tagged
+
 instance Representational Tagged
 instance Phantom Tagged
-
 instance Representational (Tagged a) where rep Coercion = Coercion
+
+-- * Const
+
+instance Representational Const where rep Coercion = Coercion
+instance Representational (Const a)
+instance Phantom (Const a)
+
+-- * Data.Type.Coercion
+
+instance Representational Coercion     where rep = unsafeCoerce
+instance Representational (Coercion a) where rep Coercion = Coercion
+
+-- * Prelude
 
 instance Representational (->)       where rep Coercion = Coercion
 instance Representational ((->) a)   where rep Coercion = Coercion
@@ -90,11 +106,17 @@ instance Representational ((,,,,,) a b c d)   where rep Coercion = Coercion
 instance Representational ((,,,,,) a b c d e) where rep Coercion = Coercion
 
 instance Representational []      where rep Coercion = Coercion
-instance Representational Complex where rep Coercion = Coercion
 instance Representational Maybe   where rep Coercion = Coercion
 instance Representational IO      where rep Coercion = Coercion
 instance Representational (ST s)  where rep Coercion = Coercion
 instance Representational STM     where rep Coercion = Coercion
+
+-- * Data.Complex
+
+instance Representational Complex where rep Coercion = Coercion
+
+-- * Data.Monoid
+
 instance Representational Sum     where rep Coercion = Coercion
 instance Representational Product where rep Coercion = Coercion
 instance Representational Dual    where rep Coercion = Coercion
@@ -102,16 +124,40 @@ instance Representational Endo    where rep Coercion = Coercion
 instance Representational First   where rep Coercion = Coercion
 instance Representational Last    where rep Coercion = Coercion
 
-instance Representational WrappedMonad where rep Coercion = Coercion
-instance Representational m => Representational (WrappedMonad m) where rep = new.rep
+-- * WrappedMonad
 
-instance Representational WrappedArrow where rep Coercion = Coercion
-instance Representational p => Representational (WrappedArrow p) where rep = unsafeCoerce
-instance Representational (p a) => Representational (WrappedArrow p a) where rep = unsafeCoerce
+instance Representational WrappedMonad where
+  rep Coercion = Coercion
 
-instance Representational f => Representational (Compose f) where rep = unsafeCoerce
-instance (Representational f, Representational g) => Representational (Compose f g) where rep = new.rep.rep
+instance Representational m => Representational (WrappedMonad m) where
+  rep = new.rep
 
-instance Representational m => Representational (StateT s m) where rep = new.rep.rep.eta.rep
-instance Representational m => Representational (ReaderT e m) where rep = new.rep.rep
-instance Representational m => Representational (WriterT w m) where rep = new.rep.eta.rep
+-- * WrappedArrow
+
+instance Representational WrappedArrow where
+  rep Coercion = Coercion
+
+instance Representational p => Representational (WrappedArrow p) where
+  rep = unsafeCoerce
+
+instance Representational (p a) => Representational (WrappedArrow p a) where
+  rep = unsafeCoerce
+
+-- * Compose
+
+instance Representational f => Representational (Compose f) where
+  rep = unsafeCoerce
+
+instance (Representational f, Representational g) => Representational (Compose f g) where
+  rep = new.rep.rep
+
+-- * MTL
+
+instance Representational m => Representational (StateT s m) where
+  rep = new.rep.rep.eta.rep
+
+instance Representational m => Representational (ReaderT e m) where
+  rep = new.rep.rep
+
+instance Representational m => Representational (WriterT w m) where
+  rep = new.rep.eta.rep
